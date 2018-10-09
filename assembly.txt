@@ -1,0 +1,5 @@
+add r1 r2 r3
+and r2 r3 r5
+divide r6 r7 r8
+multiply r9 r10 r11
+rightshift r12 60
