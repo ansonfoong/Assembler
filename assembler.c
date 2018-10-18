@@ -1,17 +1,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
 char *ltrim(char *s) { 
 	while (*s == ' ' || *s == '\t') s++;
 	return s;
 }
-
 char getRegister(char *text) {
 	if (*text == 'r' || *text=='R') text++;
 	return atoi(text);
 }
-
 int assembleLine(char *text, unsigned char* bytes) {
 	text = ltrim(text);
 	char *keyWord = strtok(text," ");
@@ -78,8 +75,8 @@ int assembleLine(char *text, unsigned char* bytes) {
 		return 2;
 	}
 	else if(strcmp("addimmediate", keyWord) == 0)
-	{
-		bytes[0] = 0x90 | getRegister(strtok(NULL, " "));
+	{	
+		bytes[0] = 0x90 | getRegister(strtok(NULL, " ")); // OPCODE 9, OR it with the first Register.
 		bytes[1] = 0x00 | getRegister(strtok(NULL, " "));
 		return 2;
 	}
@@ -88,8 +85,8 @@ int assembleLine(char *text, unsigned char* bytes) {
 		bytes[0] = 0xA0 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4;
 		int temp = atoi(strtok(NULL, " "));
-		bytes[1] |= (temp >> 12);
-		bytes[2] = 0x00 | (temp >> 8);
+		bytes[1] |= (temp >> 16); // Shift 16
+		bytes[2] = (temp >> 8);
 		bytes[3] = temp & (0xFF);
 		return 4;
 	}
@@ -98,8 +95,8 @@ int assembleLine(char *text, unsigned char* bytes) {
 		bytes[0] = 0xB0 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4;
 		int temp = atoi(strtok(NULL, " "));
-		bytes[1] |= (temp >> 12);
-		bytes[2] = 0x00 | (temp >> 8);
+		bytes[1] |= (temp >> 16); // Shift 16
+		bytes[2] = (temp >> 12);
 		bytes[3] = temp & (0xFF);
 		return 4;
 	}
@@ -137,7 +134,6 @@ int assembleLine(char *text, unsigned char* bytes) {
 	else
 		return -1;
 }
-
 int main(int argc, char **argv) {
 
 	if(argc != 3)
@@ -166,7 +162,6 @@ int main(int argc, char **argv) {
 		}
 		else
 			printf("Error opening file.\n");
-
 		fclose(src);
 		fclose(dst);
 	}

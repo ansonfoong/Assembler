@@ -1,1 +1,7 @@
 addimmediate r1 -10
+load r2 r3 -14
+jump 1000000
+branchifequal r4 r5 524284
+branchifless r4 r5 524284
+store r1 r2 10
+addimmediate r5 600
