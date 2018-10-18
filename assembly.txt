@@ -1,13 +1,1 @@
-add r5 r6 r7
-halt
-and r2 r3 r4
-divide r10 r11 r12
-multiply r13 r14 r15
-subtract r0 r0 r0
-
-
-
-or r1 r2 r3
-rightshift r2 10
-leftshift r10 12
-interrupt 18
+addimmediate r1 -10
