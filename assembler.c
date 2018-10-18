@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-char *ltrim(char *s) {
+char *ltrim(char *s) { 
 	while (*s == ' ' || *s == '\t') s++;
 	return s;
 }
@@ -15,107 +15,89 @@ char getRegister(char *text) {
 int assembleLine(char *text, unsigned char* bytes) {
 	text = ltrim(text);
 	char *keyWord = strtok(text," ");
-	if(strcmp(keyWord, "\n") == 0)
+	if(strcmp(keyWord, "\n") == 0) // If the line is equal to the \n, return -1 to handle empty lines. 
 		return -1;
-	if(strcmp("halt", keyWord) == 0)
-	{
-
+	if(strcmp("halt\n", keyWord) == 0) // 3R Instruction, 2 Bytes
+	{	
+		bytes[0] = bytes[1] = 0x00;
+		return 2;
 	}
-	else if (strcmp("add",keyWord) == 0) {
-		bytes[0] = 0x10;
-		bytes[0] |= getRegister(strtok(NULL," "));
+	else if (strcmp("add",keyWord) == 0) { // 3R Instruction, 2 Bytes
+		bytes[0] = 0x10 | getRegister(strtok(NULL," "));
 		bytes[1] = getRegister(strtok(NULL," ")) << 4 | getRegister(strtok(NULL," "));
 		return 2;
 	}
-	else if(strcmp("and", keyWord) == 0)
+	else if(strcmp("and", keyWord) == 0) // 3R Instruction, 2 Bytes
 	{
-		bytes[0] = 0x20;
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0x20 | getRegister(strtok(NULL, " ")); // Set the OPCODE to 2 and OR it with the Register Number.
+		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " ")); // Get Register, Shift Left by 4 bits.
+		return 2;
+	}
+	else if(strcmp("divide", keyWord) == 0) // 3R Instruction, 2 Bytes
+	{
+		bytes[0] = 0x30 | getRegister(strtok(NULL, " ")); // Set the OPCODE to 3, and then OR it with the Register Number.
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " "));
 		return 2;
 	}
-	else if(strcmp("divide", keyWord) == 0)
+	else if(strcmp("multiply", keyWord) == 0) // 3R Instruction, 2 Bytes
 	{
-		bytes[0] = 0x30;
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0x40 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " "));
 		return 2;
 	}
-	else if(strcmp("multiply", keyWord) == 0)
+	else if(strcmp("subtract", keyWord) == 0) // 3R Instruction, 2 Bytes
 	{
-		bytes[0] = 0x40;
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0x50 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " "));
 		return 2;
 	}
-	else if(strcmp("subtract", keyWord) == 0)
+	else if(strcmp("or", keyWord) == 0) // 3R Instruction, 2 Bytes
 	{
-		bytes[0] = 0x50;
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0x60 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " "));
 		return 2;
 	}
-	else if(strcmp("or", keyWord) == 0)
+	else if(strcmp("rightshift", keyWord) == 0) // sft instruction, 2 Bytes
 	{
-		bytes[0] = 0x60;
-		bytes[0] |= getRegister(strtok(NULL, " "));
-		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " "));
-		return 2;
-	}
-	else if(strcmp("rightshift", keyWord) == 0)
-	{
-		bytes[0] = 0x70;
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0x70 | getRegister(strtok(NULL, " "));
 		bytes[1] = 0x20 | getRegister(strtok(NULL, " "));
 		return 2;
 	}
-	else if(strcmp("leftshift", keyWord) == 0)
+	else if(strcmp("leftshift", keyWord) == 0) // sft instruction, 2 Bytes
 	{
-		bytes[0] = 0x70;
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0x70 | getRegister(strtok(NULL, " "));
 		bytes[1] = 0x00 | getRegister(strtok(NULL, " "));
 		return 2;
 	}
 	else if(strcmp("interrupt", keyWord) == 0)
 	{
 		bytes[0] = 0x80;
-		//bytes[0] |= getRegister(strtok(NULL, " "));
-		int bit = getRegister(strtok(NULL, " "));
-		bytes[0] |= (bit >> 8);
-		bytes[1] = bit & 0xFF;
-		//bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " "));
+		int bit = getRegister(strtok(NULL, " ")); // Store it once so we can perform two separate operations.
+		bytes[0] |= (bit >> 8); // We want the top 4 of 12 bits, so shift right by 8.
+		bytes[1] = bit & 0xFF; // AND the bottom 8 bits.
 		return 2;
 	}
 	else if(strcmp("addimmediate", keyWord) == 0)
 	{
-		bytes[0] = 0x90;
-		bytes[0] |= getRegister(strtok(NULL, " "));
-
-		bytes[1] = 0x00;
-		bytes[1] |= getRegister(strtok(NULL, " "));
-		//bytes[1] = getRegister(strtok(NULL, " "));
+		bytes[0] = 0x90 | getRegister(strtok(NULL, " "));
+		bytes[1] = 0x00 | getRegister(strtok(NULL, " "));
 		return 2;
 	}
 	else if(strcmp("branchifequal", keyWord) == 0)
 	{
-		bytes[0] = 0xA0;
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0xA0 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4;
 		int temp = atoi(strtok(NULL, " "));
 		bytes[1] |= (temp >> 12);
 		bytes[2] = 0x00 | (temp >> 8);
 		bytes[3] = temp & (0xFF);
-
 		return 4;
 	}
 	else if(strcmp("branchifless", keyWord) == 0)
 	{
-		bytes[0] = 0xB0; // 11
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0xB0 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4;
-
 		int temp = atoi(strtok(NULL, " "));
-
 		bytes[1] |= (temp >> 12);
 		bytes[2] = 0x00 | (temp >> 8);
 		bytes[3] = temp & (0xFF);
@@ -133,8 +115,7 @@ int assembleLine(char *text, unsigned char* bytes) {
 	}
 	else if(strcmp("iterateover", keyWord) == 0)
 	{
-		bytes[0] = 0xD0;
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0xD0 | getRegister(strtok(NULL, " "));
 		bytes[1] = 0x00 | atoi(strtok(NULL, " "));
 		int offset = atoi(strtok(NULL, " "));
 		bytes[2] = (offset >> 8) & 0xFF;
@@ -143,15 +124,13 @@ int assembleLine(char *text, unsigned char* bytes) {
 	}
 	else if(strcmp("load", keyWord) == 0)
 	{
-		bytes[0] = 0xE0;
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0xE0 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " "));
 		return 2;
 	}
 	else if(strcmp("store", keyWord) == 0)
 	{
-		bytes[0] = 0xF0;
-		bytes[0] |= getRegister(strtok(NULL, " "));
+		bytes[0] = 0xF0 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " "));
 		return 2;
 	}

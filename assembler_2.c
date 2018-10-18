@@ -39,7 +39,6 @@ char getRegister(char * text)
 
 void setRegisters(int opcode, unsigned char * bytes, char * tokens[])
 {
-
   if(opcode == 1 || opcode == 2 || opcode == 3 || opcode == 4 || opcode == 5 || opcode == 6)
   {
     char * registerOne = malloc(strlen(tokens[1]));
@@ -52,22 +51,23 @@ void setRegisters(int opcode, unsigned char * bytes, char * tokens[])
 
     bytes[0] |= getRegister(registerOne);
     bytes[1] = getRegister(registerTwo) << 4 | getRegister(registerThree);
+
   }
   else if(opcode == 7) // if Opcode is 7, only uses 1 register and has tokens[0] as 10.
   {
     char * registerOne = malloc(strlen(tokens[1])); // Stores the register.
     strcpy(registerOne, tokens[1]); // r0 - r15 is stored in registerOne.
-
+    
     bytes[0] |= getRegister(registerOne);
-
-    printf("%d\n", getRegister(registerOne));
+    //printf("Token[2]: %s\n", tokens[2]); 
+    printf("Register: %d\n", getRegister(registerOne));
   }
 
 }
 int setBytes(int opcode, unsigned char * bytes, char * tokens[])
 {
 
-  char * ins = malloc(strlen(tokens[0]));
+  char * ins = malloc(strlen(tokens[0])+1);
 
   if(opcode == 1) // If the instruction is ADD, then there are 3 registers.
   {
@@ -123,7 +123,7 @@ int setBytes(int opcode, unsigned char * bytes, char * tokens[])
 
 int stringTrim(char * str, unsigned char * bytes)
 {
-  char * copiedAssemblyLine = malloc(strlen(str));
+  char * copiedAssemblyLine = malloc(strlen(str)+1);
   char * arrayOfTokens[5];
   int i = 0;
   strcpy(copiedAssemblyLine, str);
@@ -136,7 +136,6 @@ int stringTrim(char * str, unsigned char * bytes)
   //printf("Instruction: %s\nOpcode: %d\n", arrayOfTokens[0], getOpcode(arrayOfTokens[0]));
   int opcodeOfInstruction = getOpcode(arrayOfTokens[0]); // Get the opcode by passing in the Instruction String.
   int byteCount = setBytes(opcodeOfInstruction, bytes, arrayOfTokens); // Pass in the bytes array and opcode.
-
   return byteCount;
 }
 
