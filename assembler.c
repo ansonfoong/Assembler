@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-char *ltrim(char *s) { 
+char *ltrim(char *s) {
 	while (*s == ' ' || *s == '\t') s++;
 	return s;
 }
@@ -12,10 +12,10 @@ char getRegister(char *text) {
 int assembleLine(char *text, unsigned char* bytes) {
 	text = ltrim(text);
 	char *keyWord = strtok(text," ");
-	if(strcmp(keyWord, "\n") == 0) // If the line is equal to the \n, return -1 to handle empty lines. 
+	if(strcmp(keyWord, "\n") == 0) // If the line is equal to the \n, return -1 to handle empty lines.
 		return -1;
 	if(strcmp("halt\n", keyWord) == 0) // 3R Instruction, 2 Bytes
-	{	
+	{
 		bytes[0] = bytes[1] = 0x00;
 		return 2;
 	}
@@ -75,7 +75,7 @@ int assembleLine(char *text, unsigned char* bytes) {
 		return 2;
 	}
 	else if(strcmp("addimmediate", keyWord) == 0)
-	{	
+	{
 		bytes[0] = 0x90 | getRegister(strtok(NULL, " ")); // OPCODE 9, OR it with the first Register.
 		bytes[1] = 0x00 | getRegister(strtok(NULL, " "));
 		return 2;
