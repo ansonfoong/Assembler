@@ -1,1 +1,7 @@
-addimmediate r1 -10
+leftshift r5 20
+rightshift r6 31
+
+branchifequal r1 r2 1000
+branchifless r3 r4 524286
+
+halt

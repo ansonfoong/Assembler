@@ -2,3 +2,5 @@ a.out
 out.txt
 .DS_Store
 out
+a.exe
+*.o
