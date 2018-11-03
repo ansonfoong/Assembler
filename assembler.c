@@ -1,24 +1,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-char *ltrim(char *s) { 
+char *ltrim(char *s) {
 	while (*s == ' ' || *s == '\t') s++;
 	return s;
 }
-
 char getRegister(char *text) {
 	if (*text == 'r' || *text=='R') text++;
 	return atoi(text);
 }
-
 int assembleLine(char *text, unsigned char* bytes) {
 	text = ltrim(text);
 	char *keyWord = strtok(text," ");
-	if(strcmp(keyWord, "\n") == 0) // If the line is equal to the \n, return -1 to handle empty lines. 
+	if(strcmp(keyWord, "\n") == 0) // If the line is equal to the \n, return -1 to handle empty lines.
 		return -1;
 	if(strcmp("halt\n", keyWord) == 0) // 3R Instruction, 2 Bytes
-	{	
+	{
 		bytes[0] = bytes[1] = 0x00;
 		return 2;
 	}
@@ -79,7 +76,7 @@ int assembleLine(char *text, unsigned char* bytes) {
 	}
 	else if(strcmp("addimmediate", keyWord) == 0)
 	{
-		bytes[0] = 0x90 | getRegister(strtok(NULL, " "));
+		bytes[0] = 0x90 | getRegister(strtok(NULL, " ")); // OPCODE 9, OR it with the first Register.
 		bytes[1] = 0x00 | getRegister(strtok(NULL, " "));
 		return 2;
 	}
@@ -88,8 +85,8 @@ int assembleLine(char *text, unsigned char* bytes) {
 		bytes[0] = 0xA0 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4;
 		int temp = atoi(strtok(NULL, " "));
-		bytes[1] |= (temp >> 12);
-		bytes[2] = 0x00 | (temp >> 8);
+		bytes[1] |= (temp >> 16); // Shift 16
+		bytes[2] = (temp >> 8);
 		bytes[3] = temp & (0xFF);
 		return 4;
 	}
@@ -98,8 +95,8 @@ int assembleLine(char *text, unsigned char* bytes) {
 		bytes[0] = 0xB0 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4;
 		int temp = atoi(strtok(NULL, " "));
-		bytes[1] |= (temp >> 12);
-		bytes[2] = 0x00 | (temp >> 8);
+		bytes[1] |= (temp >> 16); // Shift 16
+		bytes[2] = (temp >> 8);
 		bytes[3] = temp & (0xFF);
 		return 4;
 	}
@@ -125,26 +122,21 @@ int assembleLine(char *text, unsigned char* bytes) {
 	else if(strcmp("load", keyWord) == 0)
 	{
 		bytes[0] = 0xE0 | getRegister(strtok(NULL, " "));
-		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " "));
+		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | (getRegister(strtok(NULL, " ")) & 0xF);
 		return 2;
 	}
 	else if(strcmp("store", keyWord) == 0)
 	{
 		bytes[0] = 0xF0 | getRegister(strtok(NULL, " "));
-		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | getRegister(strtok(NULL, " "));
+		bytes[1] = getRegister(strtok(NULL, " ")) << 4 | (getRegister(strtok(NULL, " ")) & 0xF);
 		return 2;
 	}
 	else
 		return -1;
 }
-
 int main(int argc, char **argv) {
-
 	if(argc != 3)
-	{
 		printf("%s\n", "Invalid amount of arguments.");
-		exit(0);
-	}
 	else {
 		FILE *src = fopen(argv[1],"r");
 		FILE *dst = fopen(argv[2],"w");
@@ -157,16 +149,11 @@ int main(int argc, char **argv) {
 				if (NULL != fgets(line, 1000, src)) {
 					printf ("read: %s\n", line);
 					int byteCount = assembleLine(line,bytes);
-					if(byteCount == -1)
-						printf("Invalid\n");
-					else
+					if(byteCount != -1)
 						fwrite(bytes,byteCount,1,dst);
 				}
 			}
 		}
-		else
-			printf("Error opening file.\n");
-
 		fclose(src);
 		fclose(dst);
 	}
