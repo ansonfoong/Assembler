@@ -12,10 +12,12 @@ char getRegister(char *text) {
 int assembleLine(char *text, unsigned char* bytes) {
 	text = ltrim(text);
 	char *keyWord = strtok(text," ");
+	printf("Keyword: %s\n", keyWord);
 	if(strcmp(keyWord, "\n") == 0) // If the line is equal to the \n, return -1 to handle empty lines.
 		return -1;
-	if(strcmp("halt\n", keyWord) == 0) // 3R Instruction, 2 Bytes
+	if(strcmp("halt\n", keyWord) == 0 || strcmp("halt", keyWord) == 0) // 3R Instruction, 2 Bytes
 	{
+		printf("Halting....\n");
 		bytes[0] = bytes[1] = 0x00;
 		return 2;
 	}
@@ -69,7 +71,9 @@ int assembleLine(char *text, unsigned char* bytes) {
 	else if(strcmp("interrupt", keyWord) == 0)
 	{
 		bytes[0] = 0x80;
-		int bit = getRegister(strtok(NULL, " ")); // Store it once so we can perform two separate operations.
+		//int bit = getRegister(strtok(NULL, " ")); // Store it once so we can perform two separate operations.
+		int bit = atoi(strtok(NULL, " "));
+		
 		bytes[0] |= (bit >> 8); // We want the top 4 of 12 bits, so shift right by 8.
 		bytes[1] = bit & 0xFF; // AND the bottom 8 bits.
 		return 2;
@@ -85,7 +89,7 @@ int assembleLine(char *text, unsigned char* bytes) {
 		bytes[0] = 0xA0 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4;
 		int temp = atoi(strtok(NULL, " "));
-		bytes[1] |= (temp >> 16); // Shift 16
+		bytes[1] |= (temp >> 16) & 0x0F; // Shift 16
 		bytes[2] = (temp >> 8);
 		bytes[3] = temp & (0xFF);
 		return 4;
@@ -95,7 +99,7 @@ int assembleLine(char *text, unsigned char* bytes) {
 		bytes[0] = 0xB0 | getRegister(strtok(NULL, " "));
 		bytes[1] = getRegister(strtok(NULL, " ")) << 4;
 		int temp = atoi(strtok(NULL, " "));
-		bytes[1] |= (temp >> 16); // Shift 16
+		bytes[1] |= ((temp >> 16) & 0x0F); // Shift 16
 		bytes[2] = (temp >> 8);
 		bytes[3] = temp & (0xFF);
 		return 4;

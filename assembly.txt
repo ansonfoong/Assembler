@@ -1,7 +1,22 @@
-leftshift r5 20
-rightshift r6 31
+addimmediate r1 10
+addimmediate r2 27
+add r1 r2 r3
+addimmediate r3 3
 
-branchifequal r1 r2 1000
-branchifless r3 r4 524286
+subtract r3 r3 r3
+
+addimmediate r3 90
+
+divide r3 r1 r5
+
+interrupt 1
+
+addimmediate r0 2
+addimmediate r1 20
+multiply r1 r0 r6
+
+halt
+
+addimmediate r10 45
 
 halt
